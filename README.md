@@ -1,6 +1,6 @@
 # TCP toy project
 
-The goal of this project is to implement the basic features of the Transmission Contro Protocol.
+The goal of this project is to implement the basic features of the Transmission Control Protocol.
 
 Currently working on:
 
