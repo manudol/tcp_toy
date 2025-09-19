@@ -25,7 +25,7 @@ int main()
         char server_response[1024];
         
         printf(">>> ");
-        scanf("%s", client_msg);
+        fgets(client_msg, sizeof(client_msg), stdin);
 
         if (strlen(client_msg) > 0) {
             int msg_sent = send(client_socket, client_msg, strlen(client_msg), 0);
