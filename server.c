@@ -9,6 +9,44 @@
 #include <netinet/in.h>
 #include <unistd.h> // for closing socket
 
+#include <pthread.h>
+
+void *handle_client(void *arg)
+{
+    int client_fd = (int)(intptr_t)arg;
+    while(1) {
+        if (client_fd > 0) {
+            char buffer[1024];
+            int bytes_recv = recv(client_fd, buffer, sizeof(buffer), 0);
+            if (bytes_recv > 0) {
+                buffer[bytes_recv] = '\0';
+                printf("Client says: %s", buffer);
+                char msg[1024] = "Hello, Client!\n\0";
+                
+                int num_bytes_sent = send(client_fd, msg, strlen(msg), 0);
+
+                if (num_bytes_sent == (int)strlen(msg)) printf("Same length\n");
+
+                if (strncmp(buffer, "bye", 3) == 0) {
+                    printf("Client diconnecting with 'bye'\n");
+                    break;
+                }
+
+            } else if (bytes_recv == 0) {
+                printf("Client disconnected: Exiting gracefully ;)\n");
+                break;
+            } else {
+                perror("recv error");
+                break;
+            }
+        } else {
+            perror("error accepting with 'accept()'\n");
+            break;
+        }
+    }
+    close(client_fd);
+    return NULL;
+}
 
 int main()
 {
@@ -38,40 +76,10 @@ int main()
     while (1) {
         int client_fd = accept(sock_fd, NULL, NULL);
         printf("client connects\n");
-        while(1) {
-            if (client_fd > 0) {
-                char buffer[1024];
-                int bytes_recv = recv(client_fd, buffer, sizeof(buffer), 0);
-                printf("recv: %d\n", bytes_recv); 
-                if (bytes_recv > 0) {
-                    printf("taking that path\n");
-                    buffer[bytes_recv] = '\0';
-                    printf("%s", buffer);
-                    printf("Client says: %s", buffer);
-                    char msg[1024] = "Hello, World!\n\0";
-                    
-                    int num_bytes_sent = send(client_fd, msg, strlen(msg), 0);
-
-                    if (num_bytes_sent == (int)strlen(msg)) printf("Same length\n");
-
-                    if (strncmp(buffer, "bye", 3) == 0) {
-                        printf("Client diconnecting with 'bye'\n");
-                        break;
-                    }
-
-                } else if (bytes_recv == 0) {
-                    printf("Client disconnected: Exiting gracefully ;)\n");
-                    break;
-                } else {
-                    perror("recv error");
-                    break;
-                }
-            } else {
-                perror("error accepting with 'accept()'\n");
-                break;
-            }
-        }
-        close(client_fd);
+        // pethread...
+        pthread_t tid;
+        pthread_create(&tid, NULL, (void *)handle_client, (void *)(intptr_t)client_fd);
+        pthread_detach(tid);
     }
 
     close(sock_fd);
