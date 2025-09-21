@@ -1,8 +1,21 @@
 all: s c
 
-s: server.c
-	cc -Wall -Wextra -pthread -o ./build/s server.c
+utils.o: utils.c utils.h
+	cc -Wall -Wextra -c utils.c -o ./build/utils.o
 
-c: client.c
-	cc -Wall -Wextra -o ./build/c client.c
+server.o: server.c utils.h
+	cc -Wall -Wextra -pthread -c server.c -o ./build/server.o
+
+client.o: client.c utils.h
+	cc -Wall -Wextra -c client.c -o ./build/client.o
+
+
+s: server.o utils.o
+	cc -pthread -o ./build/s ./build/server.o ./build/utils.o
+
+c: client.o
+	cc -o ./build/c ./build/client.o ./build/utils.o
+
+clean:
+	rn -f *.o ./build/s ./build/c
 
