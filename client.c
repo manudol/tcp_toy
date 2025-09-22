@@ -32,9 +32,9 @@ int main()
     
         if (strlen(client_msg) > 1) {
 
-            int msg_sent = send(client_socket, client_msg, strlen(client_msg), 0); 
+            int bytes_sent = send(client_socket, client_msg, strlen(client_msg), 0); 
 
-            if (msg_sent > 0) {
+            if (bytes_sent > 0) {
                 // Receive response from server
                 char temp_bytes;
                 ssize_t available = recv(client_socket, &temp_bytes, 1, MSG_PEEK);

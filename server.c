@@ -9,7 +9,7 @@
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <unistd.h> // for closing socket
+#include <unistd.h>
 
 #include <pthread.h>
 
@@ -18,50 +18,50 @@
 void *handle_client(void *arg)
 {
     int client_fd = (int)(intptr_t)arg;
+    if (client_fd <= 0) {
+        perror("error accepting with 'accept()'\n");
+        close(client_fd);
+        return NULL;
+    }
     while(1) {
-        if (client_fd > 0) {
-            char temp_byte;
-            ssize_t available = recv(client_fd, &temp_byte, sizeof(temp_byte), MSG_PEEK);
-            
-            if (available > 0) {
-                int bytes_available;
-                ioctl(client_fd, FIONREAD, &bytes_available);
+        char temp_byte;
+        ssize_t available = recv(client_fd, &temp_byte, sizeof(temp_byte), MSG_PEEK);
+        
+        if (available > 0) {
+            int bytes_available;
+            ioctl(client_fd, FIONREAD, &bytes_available);
 
-                char* buffer = malloc(bytes_available + 1);
-                int bytes_recv = recv(client_fd, buffer, bytes_available, 0);
+            char* buffer = malloc(bytes_available + 1);
+            int bytes_recv = recv(client_fd, buffer, bytes_available, 0);
 
-                if (bytes_recv > 0) {
-                    buffer[bytes_recv] = '\0';
+            if (bytes_recv > 0) {
+                buffer[bytes_recv] = '\0';
 
-                    printf("<<< %s", buffer);
+                printf("<<< %s", buffer);
 
-                    char msg[256];
+                char msg[256];
 
-                    
-                    if (strncmp(buffer, "bye", 3) == 0) {
-                        printf("Client diconnecting with 'bye'\n");
-                        strcpy(msg, "Bye ;)\n");
-                        send(client_fd, msg, strlen(msg), 0); // response
-                        break;
-                    }
-
-                    strcpy(msg, "Hello, Client!\n");
-
+                
+                if (strncmp(buffer, "bye", 3) == 0) {
+                    printf("Client diconnecting with 'bye'\n");
+                    strcpy(msg, "Bye ;)\n");
                     send(client_fd, msg, strlen(msg), 0); // response
-
-                    free(buffer);
-
-                } else if (bytes_recv == 0) {
-                    printf("Client disconnected: Exiting gracefully ;)\n");
-                    break;
-                } else {
-                    perror("recv error");
                     break;
                 }
+
+                strcpy(msg, "Hello, Client!\n");
+
+                send(client_fd, msg, strlen(msg), 0); // response
+
+                free(buffer);
+
+            } else if (bytes_recv == 0) {
+                printf("Client disconnected: Exiting gracefully ;)\n");
+                break;
+            } else {
+                perror("recv error");
+                break;
             }
-        } else {
-            perror("error accepting with 'accept()'\n");
-            break;
         }
     }
     printf("Closing client connection\n");
@@ -82,7 +82,7 @@ int main()
     inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr);
     server_addr.sin_port = htons(8080);
 
-   if (bind(sock_fd, (struct sockaddr *)&server_addr, sizeof(server_addr))) {
+    if (bind(sock_fd, (struct sockaddr *)&server_addr, sizeof(server_addr))) {
         perror("Error binding 'bind()' socket\n");
         close(sock_fd);
         exit(EXIT_FAILURE);   
@@ -97,14 +97,13 @@ int main()
     while (1) {
         int client_fd = accept(sock_fd, NULL, NULL);
         printf("client connects\n");
-        // pethread...
+
+        // create threads...
         pthread_t tid;
         pthread_create(&tid, NULL, (void *)handle_client, (void *)(intptr_t)client_fd);
         pthread_detach(tid);
     }
-
     close(sock_fd);
-
     return 0;
 }
 
