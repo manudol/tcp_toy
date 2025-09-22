@@ -16,6 +16,3 @@ s: server.o utils.o
 c: client.o
 	cc -o ./build/c ./build/client.o ./build/utils.o
 
-clean:
-	rn -f *.o ./build/s ./build/c
-
