@@ -19,6 +19,6 @@ make -B
 ```
 
 ## Notes
-Note 1: You can start multiple clients in multiple terminal to communicate with the server.
+Note 1: You can start multiple clients in multiple terminals to communicate with the server.
 
 Note 2: Works only currently on localhost. But I plan to expand it to local network soon.
