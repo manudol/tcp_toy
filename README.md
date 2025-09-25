@@ -11,11 +11,11 @@ make -B
 - Open 2 terminals
 - In the first one, start the server with:
 ```sh
-./s
+./build/s
 ```
 - In the second one, start the client with:
 ```sh
-./c
+./build/c
 ```
 
 ## Notes
