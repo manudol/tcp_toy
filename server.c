@@ -36,55 +36,54 @@ void *handle_client(void *arg)
         char temp_byte;
         ssize_t available = recv(client_fd, &temp_byte, sizeof(temp_byte), MSG_PEEK);
         
-        if (available > 0) {
-            int bytes_available;
-            if (ioctl(client_fd, FIONREAD, &bytes_available) < 0) {
-                perror("ioctl error");
-                break;
-            }
-
-            char* buffer = malloc(bytes_available + 1);
-            if (!buffer) {
-                perror("malloc failed");
-                break;
-            }
-
-            int bytes_recv = recv(client_fd, buffer, bytes_available, 0);
-
-            if (bytes_recv > 0) {
-                buffer[bytes_recv] = '\0';
-
-                printf("<<< %s\n", buffer);
-                fflush(stdout);
-
-                char msg[256];
-                    
-                // paarse req
-                req_p *req = parse_json(buffer);
-                printf("client: %s\n", req->ip_addr);
-                
-                if (strncmp(req->msg, "bye\n", 3) == 0) {
-                    printf("Client diconnecting with 'bye'\n");
-                    strcpy(msg, "Bye ;)\n");
-                    send(client_fd, msg, strlen(msg), 0); // response
-                    break;
-                }
-
-                strcpy(msg, "Hello, Client!\n");
-
-                send(client_fd, msg, strlen(msg), 0); // response
-
-                free(buffer);
-
-            } else if (bytes_recv == 0) {
-                printf("Client disconnected: Exiting gracefully ;)\n");
-                break;
-            } else {
-                perror("recv error");
-                break;
-            }
-        } else {
+        if (available == 0) {
             printf("Client disconnected: Exiting gracefully ;)\n");
+            break;
+        }
+        int bytes_available;
+        if (ioctl(client_fd, FIONREAD, &bytes_available) < 0) {
+            perror("ioctl error");
+            break;
+        }
+
+        char* buffer = malloc(bytes_available + 1);
+        if (!buffer) {
+            perror("malloc failed");
+            break;
+        }
+
+        int bytes_recv = recv(client_fd, buffer, bytes_available, 0);
+
+        if (bytes_recv > 0) {
+            buffer[bytes_recv] = '\0';
+
+            printf("<<< %s\n", buffer);
+            fflush(stdout);
+
+            char msg[256];
+                    
+            // paarse req
+            req_p *req = parse_json(buffer);
+            printf("client: %s\n", req->ip_addr);
+                
+            if (strncmp(req->msg, "bye\n", 3) == 0) {
+                printf("Client diconnecting with 'bye'\n");
+                strcpy(msg, "Bye ;)\n");
+                send(client_fd, msg, strlen(msg), 0); // response
+                break;
+            }
+
+            strcpy(msg, "Hello, Client!\n");
+
+            send(client_fd, msg, strlen(msg), 0); // response
+
+            free(buffer);
+
+        } else if (bytes_recv == 0) {
+            printf("Client disconnected: Exiting gracefully ;)\n");
+            break;
+        } else {
+            perror("recv error");
             break;
         }
     }

@@ -48,7 +48,6 @@ char *get_json_string(req_p *req)
     json_object_set_string(msg_body_obj, req->msg);
     
     char *modified_json = (char*)json_object_to_json_string(parsed_json);
-    printf("modified_json: %s\n", modified_json);
  
     free(json_string_buffer);
     return modified_json;
