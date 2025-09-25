@@ -14,6 +14,15 @@
 #include <pthread.h>
 
 #include "utils.h"
+#include "json/json.h"
+
+
+req_p *parse_json(char* json_string)
+{
+    req_p *req = parse_json_string(json_string);
+    return req;
+}
+
 
 void *handle_client(void *arg)
 {
@@ -29,20 +38,32 @@ void *handle_client(void *arg)
         
         if (available > 0) {
             int bytes_available;
-            ioctl(client_fd, FIONREAD, &bytes_available);
+            if (ioctl(client_fd, FIONREAD, &bytes_available) < 0) {
+                perror("ioctl error");
+                break;
+            }
 
             char* buffer = malloc(bytes_available + 1);
+            if (!buffer) {
+                perror("malloc failed");
+                break;
+            }
+
             int bytes_recv = recv(client_fd, buffer, bytes_available, 0);
 
             if (bytes_recv > 0) {
                 buffer[bytes_recv] = '\0';
 
-                printf("<<< %s", buffer);
+                printf("<<< %s\n", buffer);
+                fflush(stdout);
 
                 char msg[256];
-
+                    
+                // paarse req
+                req_p *req = parse_json(buffer);
+                printf("client: %s\n", req->ip_addr);
                 
-                if (strncmp(buffer, "bye", 3) == 0) {
+                if (strncmp(req->msg, "bye\n", 3) == 0) {
                     printf("Client diconnecting with 'bye'\n");
                     strcpy(msg, "Bye ;)\n");
                     send(client_fd, msg, strlen(msg), 0); // response
@@ -62,6 +83,9 @@ void *handle_client(void *arg)
                 perror("recv error");
                 break;
             }
+        } else {
+            printf("Client disconnected: Exiting gracefully ;)\n");
+            break;
         }
     }
     printf("Closing client connection\n");
