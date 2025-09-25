@@ -20,4 +20,5 @@ make -B
 
 ## Notes
 Note 1: You can start multiple clients in multiple terminal to communicate with the server.
-note 2: Works only currently on localhost. But I plan to expand it to local network soon.
+
+Note 2: Works only currently on localhost. But I plan to expand it to local network soon.
