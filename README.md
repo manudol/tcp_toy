@@ -2,7 +2,7 @@
 
 The goal of this project is to implement the basic features of the Transmission Control Protocol.
 
-## To compile run:
+## To compile, run:
 ```sh
 make -B
 ```
