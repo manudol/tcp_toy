@@ -19,7 +19,7 @@ char *dynamic_file_reader(char* file_name, int chunk_size)
     }
     char c;
     int counter = 0;
-    // chars get added in 512 bytes chunks to buffer
+    // chars get added in 'chunk_size' num of bytes chunks to buffer - recommended 1024 bytes chunk_size
     while ((c = fgetc(file_ptr)) != EOF) {
         if (counter % chk == 0 && counter != 0) {
             char *tmp_buffer = (char*)realloc(buffer, sizeof(buffer));
