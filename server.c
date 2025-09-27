@@ -121,7 +121,7 @@ int main()
         int client_fd = accept(sock_fd, NULL, NULL);
         printf("client connects\n");
 
-        // create threads...
+        // create threads
         pthread_t tid;
         pthread_create(&tid, NULL, (void *)handle_client, (void *)(intptr_t)client_fd);
         pthread_detach(tid);
