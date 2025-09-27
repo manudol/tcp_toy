@@ -40,7 +40,8 @@ void *handle_client(void *arg)
             printf("Client disconnected: Exiting gracefully ;)\n");
             break;
         }
-        int bytes_available;
+
+	int bytes_available;
         if (ioctl(client_fd, FIONREAD, &bytes_available) < 0) {
             perror("ioctl error");
             break;
