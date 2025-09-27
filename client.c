@@ -8,7 +8,7 @@
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <unistd.h> // for closing socket
+#include <unistd.h>
 
 #include "utils.h"
 #include "json/json.h"
