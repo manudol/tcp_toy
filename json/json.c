@@ -77,6 +77,7 @@ req_p *parse_json_string(char *json_string)
 }
 
 
+// for unit testing
 void assert_JSON()
 {
     req_p *req = NULL;
