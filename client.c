@@ -14,13 +14,13 @@
 #include "json/json.h"
 
 
-char* json_msg(char client_msg[1024], char *ip_addr)
+char* json_msg(char client_msg[1024], char* ip_addr)
 {
-    req_p *req = (req_p*)malloc(sizeof(req_p));
+    req_p* req = (req_p*)malloc(sizeof(req_p));
     req->msg = (char*)client_msg;
     req->ip_addr = ip_addr;
     
-    char *json_string = get_json_string(req);
+    char* json_string = get_json_string(req);
    
     free(req);
    
@@ -31,14 +31,14 @@ char* json_msg(char client_msg[1024], char *ip_addr)
 
 int main()
 {
-    char *ip_addr = "127.0.0.1";
+    char* ip_addr = "127.0.0.1";
     struct sockaddr_in server_addr;
     server_addr.sin_family=AF_INET;
     inet_pton(AF_INET, ip_addr, &server_addr.sin_addr);    
     server_addr.sin_port = htons(8080);
 
     int client_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (connect(client_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+    if (connect(client_socket, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
         perror("Socket connection failed\n");
         return -1;
     }
@@ -72,21 +72,21 @@ int main()
         ioctl(client_socket, FIONREAD, &available_bytes);
                 
         char* server_response = malloc(available_bytes + 1); 
-        int bytes_received = recv(client_socket, server_response, available_bytes, 0);
+        int bytes_recv = recv(client_socket, server_response, available_bytes, 0);
                 
-        if (bytes_received > 0) {
-            server_response[bytes_received] = '\0';
-            printf("res: %s", server_response);
-
-            free(server_response);
-
-        } else if (bytes_received == 0) {
+        if (bytes_recv == 0) {
             printf("Server closed connection\n");
             break;
-        } else {
+        } else if (bytes_recv < 0) {
             perror("recv failed");
             break;
         }
+
+        server_response[bytes_recv] = '\0';
+
+        printf("res: %s", server_response);
+
+        free(server_response);
     }
     close(client_socket);
     return 0;

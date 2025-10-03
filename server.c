@@ -17,14 +17,14 @@
 #include "json/json.h"
 
 
-req_p *parse_json(char* json_string)
+req_p* parse_json(char* json_string)
 {
-    req_p *req = parse_json_string(json_string);
+    req_p* req = parse_json_string(json_string);
     return req;
 }
 
 
-void *handle_client(void *arg)
+void* handle_client(void* arg)
 {
     int client_fd = (int)(intptr_t)arg;
     if (client_fd <= 0) {
@@ -41,7 +41,7 @@ void *handle_client(void *arg)
             break;
         }
 
-	int bytes_available;
+    	int bytes_available;
         if (ioctl(client_fd, FIONREAD, &bytes_available) < 0) {
             perror("ioctl error");
             break;
@@ -55,38 +55,37 @@ void *handle_client(void *arg)
 
         int bytes_recv = recv(client_fd, buffer, bytes_available, 0);
 
-        if (bytes_recv > 0) {
-            buffer[bytes_recv] = '\0';
-
-            printf("<<< %s\n", buffer);
-            fflush(stdout);
-
-            char msg[256];
-                    
-            // paarse req
-            req_p *req = parse_json(buffer);
-            printf("client: %s\n", req->ip_addr);
-                
-            if (strncmp(req->msg, "bye\n", 3) == 0) {
-                printf("Client diconnecting with 'bye'\n");
-                strcpy(msg, "Bye ;)\n");
-                send(client_fd, msg, strlen(msg), 0); // response
-                break;
-            }
-
-            strcpy(msg, "Hello, Client!\n");
-
-            send(client_fd, msg, strlen(msg), 0); // response
-
-            free(buffer);
-
-        } else if (bytes_recv == 0) {
+        if (bytes_recv == 0) {
             printf("Client disconnected: Exiting gracefully ;)\n");
             break;
-        } else {
+        } else if (bytes_recv < 0) {
             perror("recv error");
             break;
         }
+
+        buffer[bytes_recv] = '\0';
+
+        printf("<<< %s\n", buffer);
+        fflush(stdout);
+
+        char msg[256];
+                    
+        // paarse req
+        req_p* req = parse_json(buffer);
+        printf("client: %s\n", req->ip_addr);
+                
+        if (strncmp(req->msg, "bye\n", 3) == 0) {
+            printf("Client diconnecting with 'bye'\n");
+            strcpy(msg, "Bye ;)\n");
+            send(client_fd, msg, strlen(msg), 0); // response
+            break;
+        }
+
+        strcpy(msg, "Hello, Client!\n");
+
+        send(client_fd, msg, strlen(msg), 0); // response
+
+        free(buffer);
     }
     printf("Closing client connection\n");
     close(client_fd);
@@ -106,7 +105,7 @@ int main()
     inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr);
     server_addr.sin_port = htons(8080);
 
-    if (bind(sock_fd, (struct sockaddr *)&server_addr, sizeof(server_addr))) {
+    if (bind(sock_fd, (struct sockaddr*)&server_addr, sizeof(server_addr))) {
         perror("Error binding 'bind()' socket\n");
         close(sock_fd);
         exit(EXIT_FAILURE);   
@@ -124,7 +123,7 @@ int main()
 
         // create threads
         pthread_t tid;
-        pthread_create(&tid, NULL, (void *)handle_client, (void *)(intptr_t)client_fd);
+        pthread_create(&tid, NULL, (void*)handle_client, (void*)(intptr_t)client_fd);
         pthread_detach(tid);
     }
     close(sock_fd);
