@@ -10,9 +10,8 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
-#include "utils.h"
 #include "json/json.h"
-
+#include "utils.h"
 
 char* json_msg(char client_msg[1024], char* ip_addr)
 {
@@ -51,7 +50,7 @@ int main()
     
         if (strlen(client_msg) <= 1) continue;
 
-        char *json_string = json_msg(client_msg, ip_addr);
+        char* json_string = json_msg(client_msg, ip_addr);
 
         int bytes_sent = send(client_socket, json_string, strlen(json_string), 0); 
 

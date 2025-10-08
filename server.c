@@ -13,9 +13,8 @@
 
 #include <pthread.h>
 
-#include "utils.h"
 #include "json/json.h"
-
+#include "utils.h"
 
 req_p* parse_json(char* json_string)
 {
